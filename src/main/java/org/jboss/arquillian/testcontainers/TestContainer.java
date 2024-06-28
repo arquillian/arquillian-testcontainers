@@ -28,8 +28,9 @@ import org.testcontainers.containers.GenericContainer;
 @Inherited
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
+@Target({ ElementType.TYPE })
 public @interface TestContainer {
     Class<? extends GenericContainer<?>> value();
+
     boolean failIfNoDocker() default true;
 }
