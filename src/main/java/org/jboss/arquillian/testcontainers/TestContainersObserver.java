@@ -18,7 +18,6 @@ package org.jboss.arquillian.testcontainers;
 
 import java.lang.reflect.Constructor;
 
-import com.github.dockerjava.api.DockerClient;
 import org.jboss.arquillian.core.api.InstanceProducer;
 import org.jboss.arquillian.core.api.annotation.Inject;
 import org.jboss.arquillian.core.api.annotation.Observes;
@@ -28,6 +27,8 @@ import org.jboss.arquillian.test.spi.event.suite.AfterClass;
 import org.jboss.arquillian.test.spi.event.suite.BeforeClass;
 import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.GenericContainer;
+
+import com.github.dockerjava.api.DockerClient;
 
 public class TestContainersObserver {
     @Inject
@@ -45,7 +46,7 @@ public class TestContainersObserver {
                 final GenericContainer<?> container = clazz.getConstructor().newInstance();
                 container.start();
                 containerWrapper.set(container);
-            } catch (Exception e) { //Clean up
+            } catch (Exception e) { // Clean up
                 throw new RuntimeException(e);
             }
         }
@@ -74,7 +75,7 @@ public class TestContainersObserver {
     }
 
     private boolean isDockerAvailable() {
-        try(DockerClient client = DockerClientFactory.instance().client()) {
+        try (DockerClient client = DockerClientFactory.instance().client()) {
             return true;
         } catch (Throwable ex) {
             return false;
