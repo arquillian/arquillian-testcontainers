@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.jboss</groupId>
         <artifactId>jboss-parent</artifactId>
-        <version>43</version>
+        <version>45</version>
         <relativePath/>
     </parent>
 
@@ -21,6 +21,35 @@
 
     <name>Arquillian Testcontainers Support</name>
     <description>Adds lifecycle management and injection support for Testcontainers in Arquillian tests</description>
+    <url>https://arquillian.org</url>
+
+    <inceptionYear>2024</inceptionYear>
+
+    <licenses>
+        <license>
+            <name>Apache License Version 2.0</name>
+            <url>https://repository.jboss.org/licenses/apache-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>jlee</id>
+            <name>Jason Lee</name>
+            <email>jason@steeplesoft.com</email>
+            <url>https://steeplesoft.com</url>
+            <organization>Red Hat, Inc.</organization>
+            <organizationUrl>https://redhat.com</organizationUrl>
+        </developer>
+        <developer>
+            <id>jamezp</id>
+            <name>James R Perkins</name>
+            <email>jperkins@redhat.com</email>
+            <organization>Red Hat, Inc.</organization>
+            <organizationUrl>https://redhat.com</organizationUrl>
+        </developer>
+    </developers>
 
     <scm>
         <connection>scm:git:git://git@github.com:arquillian/arquillian-testcontainers.git</connection>
@@ -29,6 +58,11 @@
         <tag>HEAD</tag>
     </scm>
 
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/arquillian/arquillian-testcontainers/issues</url>
+    </issueManagement>
+
     <!-- Properties -->
     <properties>
         <version.arquillian_core>1.8.0.Final</version.arquillian_core>
@@ -36,15 +70,15 @@
     </properties>
 
     <dependencyManagement>
-    <dependencies>
-        <dependency>
-            <groupId>org.jboss.arquillian</groupId>
-            <artifactId>arquillian-bom</artifactId>
-            <version>${version.arquillian_core}</version>
-            <type>pom</type>
-            <scope>import</scope>
-        </dependency>
-    </dependencies>
+        <dependencies>
+            <dependency>
+                <groupId>org.jboss.arquillian</groupId>
+                <artifactId>arquillian-bom</artifactId>
+                <version>${version.arquillian_core}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
     </dependencyManagement>
 
     <dependencies>
