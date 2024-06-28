@@ -1,2 +1,2 @@
-# arquillian-test-containers
-Arquillian loadable extension for test-container support
+# arquillian-testcontainers
+Arquillian loadable extension for [testcontainers](https://testcontainers.com/) support
