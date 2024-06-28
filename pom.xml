@@ -76,6 +76,7 @@
         <!-- Dependency versions -->
         <version.arquillian_core>1.8.0.Final</version.arquillian_core>
         <version.testcontainers>1.19.8</version.testcontainers>
+        <version.org.junit>5.10.3</version.org.junit>
 
         <!-- Plugin versions -->
         <version.formatter.maven.plugin>2.23.0</version.formatter.maven.plugin>
@@ -95,17 +96,32 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${version.org.junit}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>${version.testcontainers}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
         <dependency>
-            <groupId>org.jboss.arquillian.container</groupId>
-            <artifactId>arquillian-container-test-impl-base</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.jboss.arquillian.test</groupId>
             <artifactId>arquillian-test-spi</artifactId>
+        </dependency>
+        <!-- Required for the OperatesOnDeploymentAwareProvider -->
+        <dependency>
+            <groupId>org.jboss.arquillian.container</groupId>
+            <artifactId>arquillian-container-test-impl-base</artifactId>
         </dependency>
         <!-- To avoid a CVE. This can be removed once TC is updated -->
         <dependency>
@@ -116,7 +132,6 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers</artifactId>
-            <version>${version.testcontainers}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -128,6 +143,24 @@
             <artifactId>hamcrest</artifactId>
             <scope>provided</scope>
         </dependency>
+
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.arquillian.junit5</groupId>
+            <artifactId>arquillian-junit5-container</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>mockserver</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
