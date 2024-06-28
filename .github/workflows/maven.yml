@@ -23,13 +23,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-:
+  build:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest ]
-        java: ['11', '17', '21']
+        java: ['17', '21']
 
     steps:
       - uses: actions/checkout@v4
@@ -40,7 +40,31 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
       - name: Build with Maven Java ${{ matrix.java }}
-        run: mvn -B clean verify
+        run: mvn -B -ntp clean verify
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: surefire-reports-${{ matrix.os }}-${{ matrix.java }}
+          path: '**/surefire-reports/*'
+  test-java11:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest ]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: |
+            11
+            17
+          distribution: 'temurin'
+          cache: 'maven'
+      - name: Build with Maven Java ${{ matrix.java }}
+        run: mvn -B -ntp clean verify '-Djava11.home="${{env.JAVA_HOME_11_X64}}"'
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
