@@ -6,6 +6,8 @@ package org.jboss.arquillian.testcontainers;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.jboss.arquillian.core.api.InstanceProducer;
 import org.jboss.arquillian.core.api.annotation.Inject;
@@ -21,29 +23,43 @@ import org.testcontainers.containers.GenericContainer;
 public class TestContainersObserver {
     @Inject
     @ClassScoped
-    protected InstanceProducer<GenericContainer<?>> containerWrapper;
+    protected InstanceProducer<TestContainerInstances> containersWrapper;
 
     public void createContainer(@Observes(precedence = 500) BeforeClass beforeClass) {
         TestClass javaClass = beforeClass.getTestClass();
+        TestContainers tcAnnos = javaClass.getAnnotation(TestContainers.class);
         TestContainer tcAnno = javaClass.getAnnotation(TestContainer.class);
-        if (tcAnno != null) {
-            checkForDocker(tcAnno.failIfNoDocker());
+        if (tcAnno != null || tcAnnos != null) {
+            TestContainer[] testContainers = (tcAnnos != null) ? tcAnnos.value() : new TestContainer[] { tcAnno };
+            List<GenericContainer<?>> containers = new ArrayList<>();
+            for (TestContainer testContainer : testContainers) {
+                checkForDocker(testContainer.failIfNoDocker());
 
-            Class<? extends GenericContainer<?>> clazz = tcAnno.value();
-            try {
-                final GenericContainer<?> container = clazz.getConstructor().newInstance();
-                container.start();
-                containerWrapper.set(container);
-            } catch (Exception e) { // Clean up
-                throw new RuntimeException(e);
+                Class<? extends GenericContainer<?>> clazz = testContainer.value();
+                try {
+                    final GenericContainer<?> container = clazz.getConstructor().newInstance();
+                    containers.add(container);
+                } catch (Exception e) { // Clean up
+                    throw new RuntimeException(e);
+                }
             }
+            TestContainerInstances instances = new TestContainerInstances(containers);
+            containersWrapper.set(instances);
+            instances.beforeStart();
+            for (GenericContainer<?> container : instances.all()) {
+                container.start();
+            }
+            instances.afterStart();
         }
     }
 
     public void stopContainer(@Observes AfterClass afterClass) {
-        GenericContainer<?> container = containerWrapper.get();
-        if (container != null) {
-            container.stop();
+        TestContainerInstances instances = containersWrapper.get();
+        if (instances != null) {
+            instances.beforeStop();
+            for (GenericContainer<?> container : instances.all()) {
+                container.stop();
+            }
         }
     }
 
@@ -58,7 +74,8 @@ public class TestContainersObserver {
                 // Not found, attempt to throw a JUnit exception
                 throwAssumption("org.junit.AssumptionViolatedException", detailMessage);
                 // No supported test platform found. Throw an AssertionError.
-                throw new AssertionError("Failed to find a support test platform and no Docker environment is available.");
+                throw new AssertionError(
+                        "Failed to find a support test platform and no Docker environment is available.");
             }
         }
     }

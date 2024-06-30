@@ -16,15 +16,31 @@ import org.testcontainers.containers.GenericContainer;
 public class TestContainerProvider extends OperatesOnDeploymentAwareProvider {
     @Inject
     @ClassScoped
-    private Instance<GenericContainer<?>> genericContainerInstance;
+    private Instance<TestContainerInstances> containerInstances;
 
     @Override
     public Object doLookup(ArquillianResource resource, Annotation... qualifiers) {
-        return genericContainerInstance.get();
+        TestContainerInstances instances = containerInstances.get();
+        if (instances != null) {
+            // if there is only 1 container, return the instance
+            if (instances.all().size() == 1) {
+                return instances.get(0);
+            }
+            // if there is more then 1 container, search if there is a matching qualifier
+            for (GenericContainer<?> container : instances.all()) {
+                for (Annotation qualifier : qualifiers) {
+                    if (container.getClass().isAnnotationPresent(qualifier.annotationType())) {
+                        return container;
+                    }
+                }
+            }
+        }
+        // if there are more than 1 containers and no qualifier matches, return all instances
+        return instances;
     }
 
     @Override
     public boolean canProvide(Class<?> type) {
-        return GenericContainer.class.isAssignableFrom(type);
+        return TestContainerInstances.class.isAssignableFrom(type) || GenericContainer.class.isAssignableFrom(type);
     }
 }
