@@ -19,7 +19,7 @@ public class TestContainerInstances implements Iterable<GenericContainer<?>> {
     }
 
     /**
-     * @return the list of all instance in order of declaration 
+     * @return the list of all instance in order of declaration
      */
     public List<GenericContainer<?>> all() {
         return containers;
@@ -27,7 +27,7 @@ public class TestContainerInstances implements Iterable<GenericContainer<?>> {
 
     /**
      * retrieve a container instance by its index in the declaration
-     * 
+     *
      * @return {@link IndexOutOfBoundsException} if index is wrong
      */
     public GenericContainer<?> get(int index) {
@@ -36,6 +36,7 @@ public class TestContainerInstances implements Iterable<GenericContainer<?>> {
 
     /**
      * search a container instance by its qualifier
+     *
      * @param qualifier the annotation
      * @return the container instance or null, if none matches
      */

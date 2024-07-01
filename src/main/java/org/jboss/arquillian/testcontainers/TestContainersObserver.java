@@ -25,9 +25,9 @@ import org.testcontainers.containers.GenericContainer;
 public class TestContainersObserver {
     @Inject
     @ClassScoped
-    protected InstanceProducer<TestContainerInstances> containersWrapper;
-    
-    protected ContainerRegistry registry;
+    private InstanceProducer<TestContainerInstances> containersWrapper;
+
+    private ContainerRegistry registry;
 
     public void createContainer(@Observes(precedence = 500) BeforeClass beforeClass) {
         TestClass javaClass = beforeClass.getTestClass();
@@ -57,7 +57,7 @@ public class TestContainersObserver {
             instances.afterStart(registry);
         }
     }
-    
+
     public void registerInstance(@Observes ContainerRegistry registry, ServiceLoader serviceLoader) {
         this.registry = registry;
     }
