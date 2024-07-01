@@ -34,10 +34,11 @@ public class TestContainersObserver {
         TestContainers tcAnnos = javaClass.getAnnotation(TestContainers.class);
         TestContainer tcAnno = javaClass.getAnnotation(TestContainer.class);
         if (tcAnno != null || tcAnnos != null) {
+            boolean isDockerAvailable = isDockerAvailable();
             TestContainer[] testContainers = (tcAnnos != null) ? tcAnnos.value() : new TestContainer[] { tcAnno };
             List<GenericContainer<?>> containers = new ArrayList<>();
             for (TestContainer testContainer : testContainers) {
-                checkForDocker(testContainer.failIfNoDocker());
+                checkForDocker(testContainer.failIfNoDocker(), isDockerAvailable);
 
                 Class<? extends GenericContainer<?>> clazz = testContainer.value();
                 try {
@@ -71,9 +72,9 @@ public class TestContainersObserver {
         }
     }
 
-    private void checkForDocker(boolean failIfNoDocker) {
+    private void checkForDocker(boolean failIfNoDocker, boolean isDockerAvailable) {
         final String detailMessage = "No Docker environment is available.";
-        if (!isDockerAvailable()) {
+        if (!isDockerAvailable) {
             if (failIfNoDocker) {
                 throw new AssertionError(detailMessage);
             } else {
