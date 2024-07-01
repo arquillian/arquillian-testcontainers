@@ -9,9 +9,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jboss.arquillian.container.spi.ContainerRegistry;
 import org.jboss.arquillian.core.api.InstanceProducer;
 import org.jboss.arquillian.core.api.annotation.Inject;
 import org.jboss.arquillian.core.api.annotation.Observes;
+import org.jboss.arquillian.core.spi.ServiceLoader;
 import org.jboss.arquillian.test.spi.TestClass;
 import org.jboss.arquillian.test.spi.annotation.ClassScoped;
 import org.jboss.arquillian.test.spi.event.suite.AfterClass;
@@ -24,6 +26,8 @@ public class TestContainersObserver {
     @Inject
     @ClassScoped
     protected InstanceProducer<TestContainerInstances> containersWrapper;
+    
+    protected ContainerRegistry registry;
 
     public void createContainer(@Observes(precedence = 500) BeforeClass beforeClass) {
         TestClass javaClass = beforeClass.getTestClass();
@@ -45,18 +49,22 @@ public class TestContainersObserver {
             }
             TestContainerInstances instances = new TestContainerInstances(containers);
             containersWrapper.set(instances);
-            instances.beforeStart();
+            instances.beforeStart(registry);
             for (GenericContainer<?> container : instances.all()) {
                 container.start();
             }
-            instances.afterStart();
+            instances.afterStart(registry);
         }
+    }
+    
+    public void registerInstance(@Observes ContainerRegistry registry, ServiceLoader serviceLoader) {
+        this.registry = registry;
     }
 
     public void stopContainer(@Observes AfterClass afterClass) {
         TestContainerInstances instances = containersWrapper.get();
         if (instances != null) {
-            instances.beforeStop();
+            instances.beforeStop(registry);
             for (GenericContainer<?> container : instances.all()) {
                 container.stop();
             }
