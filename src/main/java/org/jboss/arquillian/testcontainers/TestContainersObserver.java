@@ -6,10 +6,14 @@ package org.jboss.arquillian.testcontainers;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.jboss.arquillian.container.spi.ContainerRegistry;
 import org.jboss.arquillian.core.api.InstanceProducer;
 import org.jboss.arquillian.core.api.annotation.Inject;
 import org.jboss.arquillian.core.api.annotation.Observes;
+import org.jboss.arquillian.core.spi.ServiceLoader;
 import org.jboss.arquillian.test.spi.TestClass;
 import org.jboss.arquillian.test.spi.annotation.ClassScoped;
 import org.jboss.arquillian.test.spi.event.suite.AfterClass;
@@ -21,35 +25,52 @@ import org.testcontainers.containers.GenericContainer;
 public class TestContainersObserver {
     @Inject
     @ClassScoped
-    protected InstanceProducer<GenericContainer<?>> containerWrapper;
+    private InstanceProducer<TestContainerInstances> containersWrapper;
+
+    private ContainerRegistry registry;
 
     public void createContainer(@Observes(precedence = 500) BeforeClass beforeClass) {
         TestClass javaClass = beforeClass.getTestClass();
         TestContainer tcAnno = javaClass.getAnnotation(TestContainer.class);
         if (tcAnno != null) {
-            checkForDocker(tcAnno.failIfNoDocker());
-
-            Class<? extends GenericContainer<?>> clazz = tcAnno.value();
-            try {
-                final GenericContainer<?> container = clazz.getConstructor().newInstance();
+            boolean isDockerAvailable = isDockerAvailable();
+            checkForDocker(tcAnno.failIfNoDocker(), isDockerAvailable);
+            List<GenericContainer<?>> containers = new ArrayList<>();
+            for (Class<? extends GenericContainer<?>> clazz : tcAnno.value()) {
+                try {
+                    final GenericContainer<?> container = clazz.getConstructor().newInstance();
+                    containers.add(container);
+                } catch (Exception e) { // Clean up
+                    throw new RuntimeException(e);
+                }
+            }
+            TestContainerInstances instances = new TestContainerInstances(containers);
+            containersWrapper.set(instances);
+            instances.beforeStart(registry);
+            for (GenericContainer<?> container : instances.all()) {
                 container.start();
-                containerWrapper.set(container);
-            } catch (Exception e) { // Clean up
-                throw new RuntimeException(e);
+            }
+            instances.afterStart(registry);
+        }
+    }
+
+    public void registerInstance(@Observes ContainerRegistry registry, ServiceLoader serviceLoader) {
+        this.registry = registry;
+    }
+
+    public void stopContainer(@Observes AfterClass afterClass) {
+        TestContainerInstances instances = containersWrapper.get();
+        if (instances != null) {
+            instances.beforeStop(registry);
+            for (GenericContainer<?> container : instances.all()) {
+                container.stop();
             }
         }
     }
 
-    public void stopContainer(@Observes AfterClass afterClass) {
-        GenericContainer<?> container = containerWrapper.get();
-        if (container != null) {
-            container.stop();
-        }
-    }
-
-    private void checkForDocker(boolean failIfNoDocker) {
+    private void checkForDocker(boolean failIfNoDocker, boolean isDockerAvailable) {
         final String detailMessage = "No Docker environment is available.";
-        if (!isDockerAvailable()) {
+        if (!isDockerAvailable) {
             if (failIfNoDocker) {
                 throw new AssertionError(detailMessage);
             } else {
@@ -58,7 +79,8 @@ public class TestContainersObserver {
                 // Not found, attempt to throw a JUnit exception
                 throwAssumption("org.junit.AssumptionViolatedException", detailMessage);
                 // No supported test platform found. Throw an AssertionError.
-                throw new AssertionError("Failed to find a support test platform and no Docker environment is available.");
+                throw new AssertionError(
+                        "Failed to find a support test platform and no Docker environment is available.");
             }
         }
     }
