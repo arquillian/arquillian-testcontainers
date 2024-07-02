@@ -9,13 +9,13 @@ on:
       - 'dependabot/**'
     paths:
       - '**/pom.xml'
-      - 'src/*'
+      - 'src/**'
   pull_request:
     branches:
       - '**'
     paths:
       - '**/pom.xml'
-      - 'src/*'
+      - 'src/**'
 
 # Only run the latest job
 concurrency:
