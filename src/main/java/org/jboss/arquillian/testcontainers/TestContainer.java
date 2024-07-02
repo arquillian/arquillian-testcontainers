@@ -7,7 +7,6 @@ package org.jboss.arquillian.testcontainers;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
-import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -18,9 +17,8 @@ import org.testcontainers.containers.GenericContainer;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
-@Repeatable(TestContainers.class)
 public @interface TestContainer {
-    Class<? extends GenericContainer<?>> value();
+    Class<? extends GenericContainer<?>>[] value();
 
     boolean failIfNoDocker() default true;
 }

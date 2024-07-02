@@ -31,16 +31,12 @@ public class TestContainersObserver {
 
     public void createContainer(@Observes(precedence = 500) BeforeClass beforeClass) {
         TestClass javaClass = beforeClass.getTestClass();
-        TestContainers tcAnnos = javaClass.getAnnotation(TestContainers.class);
         TestContainer tcAnno = javaClass.getAnnotation(TestContainer.class);
-        if (tcAnno != null || tcAnnos != null) {
+        if (tcAnno != null) {
             boolean isDockerAvailable = isDockerAvailable();
-            TestContainer[] testContainers = (tcAnnos != null) ? tcAnnos.value() : new TestContainer[] { tcAnno };
+            checkForDocker(tcAnno.failIfNoDocker(), isDockerAvailable);
             List<GenericContainer<?>> containers = new ArrayList<>();
-            for (TestContainer testContainer : testContainers) {
-                checkForDocker(testContainer.failIfNoDocker(), isDockerAvailable);
-
-                Class<? extends GenericContainer<?>> clazz = testContainer.value();
+            for (Class<? extends GenericContainer<?>> clazz : tcAnno.value()) {
                 try {
                     final GenericContainer<?> container = clazz.getConstructor().newInstance();
                     containers.add(container);
