@@ -2,7 +2,7 @@
  * Copyright The Arquillian Authors
  * SPDX-License-Identifier: Apache-2.0
  */
-package org.jboss.arquillian.testcontainers;
+package org.jboss.arquillian.testcontainers.api;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

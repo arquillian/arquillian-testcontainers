@@ -18,11 +18,13 @@ import org.jboss.arquillian.test.spi.TestClass;
 import org.jboss.arquillian.test.spi.annotation.ClassScoped;
 import org.jboss.arquillian.test.spi.event.suite.AfterClass;
 import org.jboss.arquillian.test.spi.event.suite.BeforeClass;
+import org.jboss.arquillian.testcontainers.api.TestContainer;
+import org.jboss.arquillian.testcontainers.api.TestContainerInstances;
 import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.GenericContainer;
 
 @SuppressWarnings("unused")
-public class TestContainersObserver {
+class TestContainersObserver {
     @Inject
     @ClassScoped
     private InstanceProducer<TestContainerInstances> containersWrapper;
@@ -33,8 +35,7 @@ public class TestContainersObserver {
         TestClass javaClass = beforeClass.getTestClass();
         TestContainer tcAnno = javaClass.getAnnotation(TestContainer.class);
         if (tcAnno != null) {
-            boolean isDockerAvailable = isDockerAvailable();
-            checkForDocker(tcAnno.failIfNoDocker(), isDockerAvailable);
+            checkForDocker(tcAnno.failIfNoDocker(), isDockerAvailable());
             List<GenericContainer<?>> containers = new ArrayList<>();
             for (Class<? extends GenericContainer<?>> clazz : tcAnno.value()) {
                 try {

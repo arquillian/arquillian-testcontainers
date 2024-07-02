@@ -2,7 +2,7 @@
  * Copyright The Arquillian Authors
  * SPDX-License-Identifier: Apache-2.0
  */
-package org.jboss.arquillian.testcontainers;
+package org.jboss.arquillian.testcontainers.api;
 
 import java.lang.annotation.Annotation;
 import java.util.Iterator;
@@ -12,9 +12,9 @@ import org.jboss.arquillian.container.spi.ContainerRegistry;
 import org.testcontainers.containers.GenericContainer;
 
 public class TestContainerInstances implements Iterable<GenericContainer<?>> {
-    private List<GenericContainer<?>> containers;
+    private final List<GenericContainer<?>> containers;
 
-    TestContainerInstances(List<GenericContainer<?>> containers) {
+    public TestContainerInstances(List<GenericContainer<?>> containers) {
         this.containers = containers;
     }
 
@@ -49,7 +49,7 @@ public class TestContainerInstances implements Iterable<GenericContainer<?>> {
         return null;
     }
 
-    void beforeStart(ContainerRegistry registry) {
+    public void beforeStart(ContainerRegistry registry) {
         for (GenericContainer<?> container : all()) {
             if (container instanceof TestContainerLifecycle) {
                 ((TestContainerLifecycle) container).beforeStart(this, registry);
@@ -57,7 +57,7 @@ public class TestContainerInstances implements Iterable<GenericContainer<?>> {
         }
     }
 
-    void afterStart(ContainerRegistry registry) {
+    public void afterStart(ContainerRegistry registry) {
         for (GenericContainer<?> container : all()) {
             if (container instanceof TestContainerLifecycle) {
                 ((TestContainerLifecycle) container).afterStart(this, registry);
@@ -65,7 +65,7 @@ public class TestContainerInstances implements Iterable<GenericContainer<?>> {
         }
     }
 
-    void beforeStop(ContainerRegistry registry) {
+    public void beforeStop(ContainerRegistry registry) {
         for (GenericContainer<?> container : all()) {
             if (container instanceof TestContainerLifecycle) {
                 ((TestContainerLifecycle) container).beforeStop(this, registry);
