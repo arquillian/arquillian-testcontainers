@@ -11,9 +11,10 @@ import org.jboss.arquillian.core.api.Instance;
 import org.jboss.arquillian.core.api.annotation.Inject;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.arquillian.test.spi.annotation.ClassScoped;
+import org.jboss.arquillian.testcontainers.api.TestContainerInstances;
 import org.testcontainers.containers.GenericContainer;
 
-public class TestContainerProvider extends OperatesOnDeploymentAwareProvider {
+class TestContainerProvider extends OperatesOnDeploymentAwareProvider {
     @Inject
     @ClassScoped
     private Instance<TestContainerInstances> containerInstances;
@@ -26,7 +27,7 @@ public class TestContainerProvider extends OperatesOnDeploymentAwareProvider {
             if (instances.all().size() == 1) {
                 return instances.get(0);
             }
-            // if there is more then 1 container, search if there is a matching qualifier
+            // if there is more than 1 container, search if there is a matching qualifier
             for (GenericContainer<?> container : instances.all()) {
                 for (Annotation qualifier : qualifiers) {
                     if (container.getClass().isAnnotationPresent(qualifier.annotationType())) {
@@ -35,7 +36,7 @@ public class TestContainerProvider extends OperatesOnDeploymentAwareProvider {
                 }
             }
         }
-        // if there are more than 1 containers and no qualifier matches, return all instances
+        // if there are more than 1 container and no qualifier matches, return all instances
         return instances;
     }
 
