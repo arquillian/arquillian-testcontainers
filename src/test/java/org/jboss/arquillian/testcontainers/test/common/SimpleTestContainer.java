@@ -5,6 +5,7 @@
 
 package org.jboss.arquillian.testcontainers.test.common;
 
+import org.jboss.arquillian.testcontainers.api.LoggingConsumer;
 import org.testcontainers.containers.MockServerContainer;
 import org.testcontainers.utility.DockerImageName;
 
@@ -17,5 +18,11 @@ public class SimpleTestContainer extends MockServerContainer {
         super(DockerImageName
                 .parse("mockserver/mockserver")
                 .withTag("latest"));
+    }
+
+    @Override
+    protected void configure() {
+        super.configure();
+        withLogConsumer(LoggingConsumer.of(SimpleTestContainer.class));
     }
 }
