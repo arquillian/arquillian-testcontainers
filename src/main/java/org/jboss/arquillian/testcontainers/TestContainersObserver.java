@@ -4,22 +4,29 @@
  */
 package org.jboss.arquillian.testcontainers;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.jboss.arquillian.container.spi.ContainerRegistry;
+import org.jboss.arquillian.core.api.Instance;
 import org.jboss.arquillian.core.api.InstanceProducer;
 import org.jboss.arquillian.core.api.annotation.Inject;
 import org.jboss.arquillian.core.api.annotation.Observes;
-import org.jboss.arquillian.core.spi.ServiceLoader;
 import org.jboss.arquillian.test.spi.TestClass;
 import org.jboss.arquillian.test.spi.annotation.ClassScoped;
+import org.jboss.arquillian.test.spi.event.enrichment.AfterEnrichment;
 import org.jboss.arquillian.test.spi.event.suite.AfterClass;
 import org.jboss.arquillian.test.spi.event.suite.BeforeClass;
 import org.jboss.arquillian.testcontainers.api.TestContainer;
 import org.jboss.arquillian.testcontainers.api.TestContainerInstances;
+import org.jboss.arquillian.testcontainers.api.TestContainerResource;
 import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.GenericContainer;
 
@@ -29,7 +36,8 @@ class TestContainersObserver {
     @ClassScoped
     private InstanceProducer<TestContainerInstances> containersWrapper;
 
-    private ContainerRegistry registry;
+    @Inject
+    private Instance<ContainerRegistry> registry;
 
     public void createContainer(@Observes(precedence = 500) BeforeClass beforeClass) {
         TestClass javaClass = beforeClass.getTestClass();
@@ -47,24 +55,52 @@ class TestContainersObserver {
             }
             TestContainerInstances instances = new TestContainerInstances(containers);
             containersWrapper.set(instances);
-            instances.beforeStart(registry);
-            for (GenericContainer<?> container : instances.all()) {
-                container.start();
-            }
-            instances.afterStart(registry);
         }
-    }
-
-    public void registerInstance(@Observes ContainerRegistry registry, ServiceLoader serviceLoader) {
-        this.registry = registry;
     }
 
     public void stopContainer(@Observes AfterClass afterClass) {
         TestContainerInstances instances = containersWrapper.get();
         if (instances != null) {
-            instances.beforeStop(registry);
+            instances.beforeStop(registry.get());
             for (GenericContainer<?> container : instances.all()) {
                 container.stop();
+            }
+        }
+    }
+
+    public void startContainer(@Observes final AfterEnrichment event) {
+        // Look for the servers to start
+        for (Field field : SecurityActions.getFieldsWithAnnotation(event.getInstance().getClass(),
+                TestContainerResource.class)) {
+            final TestContainerResource testContainerResource = field.getAnnotation(TestContainerResource.class);
+            if (testContainerResource.value()) {
+                if (field.trySetAccessible()) {
+                    try {
+                        final GenericContainer<?> container = (GenericContainer<?>) field.get(event.getInstance());
+                        container.start();
+                        containersWrapper.get().afterStart(registry.get());
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }
+        // Check the method
+        if (event.getMethod() != null) {
+            for (Parameter parameter : event.getMethod().getParameters()) {
+                if (parameter.getType().equals(TestContainerResource.class)) {
+                    final TestContainerResource testContainerResource = parameter.getAnnotation(TestContainerResource.class);
+                    if (testContainerResource.value()) {
+                        final List<Annotation> qualifiers = Stream.of(parameter.getAnnotations())
+                                .filter(a -> !(a instanceof TestContainerResource))
+                                .collect(Collectors.toList());
+                        final GenericContainer<?> container = TestContainerLookup.lookup(parameter.getType(), qualifiers,
+                                containersWrapper.get());
+                        containersWrapper.get().beforeStart(registry.get());
+                        container.start();
+                        containersWrapper.get().afterStart(registry.get());
+                    }
+                }
             }
         }
     }
