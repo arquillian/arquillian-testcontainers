@@ -8,8 +8,6 @@ package org.jboss.arquillian.testcontainers;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -105,22 +103,20 @@ public class ContainerInjectionTestEnricher implements TestEnricher {
     }
 
     private static List<Field> getFieldsWithAnnotation(final Class<?> source) {
-        return AccessController.doPrivileged((PrivilegedAction<List<Field>>) () -> {
-            final List<Field> foundFields = new ArrayList<>();
-            Class<?> nextSource = source;
-            while (nextSource != Object.class) {
-                for (Field field : nextSource.getDeclaredFields()) {
-                    if (field.isAnnotationPresent(Testcontainer.class)) {
-                        if (!field.trySetAccessible()) {
-                            throw new IllegalStateException(String.format("Could not make field %s accessible", field));
-                        }
-                        foundFields.add(field);
+        final List<Field> foundFields = new ArrayList<>();
+        Class<?> nextSource = source;
+        while (nextSource != Object.class) {
+            for (Field field : nextSource.getDeclaredFields()) {
+                if (field.isAnnotationPresent(Testcontainer.class)) {
+                    if (!field.trySetAccessible()) {
+                        throw new IllegalStateException(String.format("Could not make field %s accessible", field));
                     }
+                    foundFields.add(field);
                 }
-                nextSource = nextSource.getSuperclass();
             }
-            return List.copyOf(foundFields);
-        });
+            nextSource = nextSource.getSuperclass();
+        }
+        return List.copyOf(foundFields);
     }
 
     private static boolean isAnnotatedWith(final Class<?> clazz, final Class<? extends Annotation> annotation) {
