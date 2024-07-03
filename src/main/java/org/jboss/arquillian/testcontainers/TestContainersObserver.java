@@ -5,9 +5,7 @@
 package org.jboss.arquillian.testcontainers;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Parameter;
 
 import org.jboss.arquillian.container.spi.ContainerRegistry;
 import org.jboss.arquillian.core.api.Instance;
@@ -55,22 +53,8 @@ class TestContainersObserver {
     public void startContainer(@Observes(precedence = 500) final AfterEnrichment event) {
         // Look for the servers to start on fields only
         for (TestcontainerDescription description : containerRegistry.get()) {
-            if (!(description.element instanceof Field)) {
-                continue;
-            }
             if (description.testcontainer.value()) {
                 description.instance.start();
-            }
-        }
-        // Check the method
-        if (event.getMethod() != null) {
-            // Look for the servers to start on fields for this method
-            for (Parameter parameter : event.getMethod().getParameters()) {
-                for (TestcontainerDescription description : containerRegistry.get()) {
-                    if (parameter.equals(description.element) && description.testcontainer.value()) {
-                        description.instance.start();
-                    }
-                }
             }
         }
     }

@@ -8,7 +8,6 @@ package org.jboss.arquillian.testcontainers;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -51,7 +50,8 @@ public class ContainerInjectionTestEnricher implements TestEnricher {
                 if (testcontainer.type() == GenericContainer.class) {
                     if (!(GenericContainer.class.isAssignableFrom(field.getType()))) {
                         throw new IllegalArgumentException(
-                                String.format("Field %s is not assignable to %s", field, testcontainer.type().getName()));
+                                String.format("Field %s is not assignable to %s", field, testcontainer.type()
+                                        .getName()));
                     }
                 } else {
                     // An explicit type was defined, make sure we can assign the type to the field
@@ -62,8 +62,9 @@ public class ContainerInjectionTestEnricher implements TestEnricher {
                     }
                 }
 
-                value = instances.get().lookupOrCreate((Class<GenericContainer<?>>) field.getType(), field, testcontainer,
-                        qualifiers);
+                value = instances.get()
+                        .lookupOrCreate((Class<GenericContainer<?>>) field.getType(), field, testcontainer,
+                                qualifiers);
             } catch (Exception e) {
                 throw new RuntimeException("Could not lookup value for field " + field, e);
             }
@@ -83,40 +84,7 @@ public class ContainerInjectionTestEnricher implements TestEnricher {
 
     @Override
     public Object[] resolve(final Method method) {
-        final Object[] values = new Object[method.getParameterTypes().length];
-        if (!isAnnotatedWith(method.getDeclaringClass(), DockerRequired.class)) {
-            return values;
-        }
-        final Parameter[] parameters = method.getParameters();
-        for (int i = 0; i < parameters.length; i++) {
-            final Parameter parameter = parameters[i];
-            if (parameter.isAnnotationPresent(Testcontainer.class)) {
-                final Testcontainer testcontainer = parameter.getAnnotation(Testcontainer.class);
-                final List<Annotation> qualifiers = Stream.of(parameter.getAnnotations())
-                        .filter(a -> !(a instanceof Testcontainer))
-                        .collect(Collectors.toList());
-
-                // If the field is the default GenericContainer, validate the field is a GenericContainer
-                if (testcontainer.type() == GenericContainer.class) {
-                    if (!(GenericContainer.class.isAssignableFrom(parameter.getType()))) {
-                        throw new IllegalArgumentException(
-                                String.format("Parameter %s is not assignable to %s", parameter,
-                                        testcontainer.type().getName()));
-                    }
-                } else {
-                    // An explicit type was defined, make sure we can assign the type to the field
-                    if (!(parameter.getType().isAssignableFrom(testcontainer.type()))) {
-                        throw new IllegalArgumentException(
-                                String.format("Parameter %s is not assignable to %s", parameter, testcontainer.type()
-                                        .getName()));
-                    }
-                }
-                values[i] = instances.get().lookupOrCreate((Class<GenericContainer<?>>) parameter.getType(), parameter,
-                        testcontainer,
-                        qualifiers);
-            }
-        }
-        return values;
+        return new Object[method.getParameterTypes().length];
     }
 
     private static void checkForDocker(boolean isDockerAvailable) {
