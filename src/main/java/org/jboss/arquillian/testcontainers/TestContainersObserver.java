@@ -5,66 +5,72 @@
 package org.jboss.arquillian.testcontainers;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
+import java.lang.reflect.Parameter;
 
 import org.jboss.arquillian.container.spi.ContainerRegistry;
+import org.jboss.arquillian.core.api.Instance;
 import org.jboss.arquillian.core.api.InstanceProducer;
 import org.jboss.arquillian.core.api.annotation.Inject;
 import org.jboss.arquillian.core.api.annotation.Observes;
-import org.jboss.arquillian.core.spi.ServiceLoader;
 import org.jboss.arquillian.test.spi.TestClass;
 import org.jboss.arquillian.test.spi.annotation.ClassScoped;
+import org.jboss.arquillian.test.spi.event.enrichment.AfterEnrichment;
 import org.jboss.arquillian.test.spi.event.suite.AfterClass;
 import org.jboss.arquillian.test.spi.event.suite.BeforeClass;
-import org.jboss.arquillian.testcontainers.api.TestContainer;
-import org.jboss.arquillian.testcontainers.api.TestContainerInstances;
+import org.jboss.arquillian.testcontainers.api.DockerRequired;
 import org.testcontainers.DockerClientFactory;
-import org.testcontainers.containers.GenericContainer;
 
 @SuppressWarnings("unused")
 class TestContainersObserver {
     @Inject
     @ClassScoped
-    private InstanceProducer<TestContainerInstances> containersWrapper;
+    private InstanceProducer<TestcontainerRegistry> containerRegistry;
 
-    private ContainerRegistry registry;
+    @Inject
+    private Instance<ContainerRegistry> registry;
 
-    public void createContainer(@Observes(precedence = 500) BeforeClass beforeClass) {
-        TestClass javaClass = beforeClass.getTestClass();
-        TestContainer tcAnno = javaClass.getAnnotation(TestContainer.class);
-        if (tcAnno != null) {
-            checkForDocker(tcAnno.failIfNoDocker(), isDockerAvailable());
-            List<GenericContainer<?>> containers = new ArrayList<>();
-            for (Class<? extends GenericContainer<?>> clazz : tcAnno.value()) {
-                try {
-                    final GenericContainer<?> container = clazz.getConstructor().newInstance();
-                    containers.add(container);
-                } catch (Exception e) { // Clean up
-                    throw new RuntimeException(e);
-                }
+    public void createContainer(@Observes(precedence = 500) BeforeClass beforeClass) throws Throwable {
+        final TestClass javaClass = beforeClass.getTestClass();
+        final DockerRequired dockerRequired = javaClass.getAnnotation(DockerRequired.class);
+        if (dockerRequired != null) {
+            if (!isDockerAvailable()) {
+                throw createException(dockerRequired.value());
             }
-            TestContainerInstances instances = new TestContainerInstances(containers);
-            containersWrapper.set(instances);
-            instances.beforeStart(registry);
-            for (GenericContainer<?> container : instances.all()) {
-                container.start();
-            }
-            instances.afterStart(registry);
         }
-    }
-
-    public void registerInstance(@Observes ContainerRegistry registry, ServiceLoader serviceLoader) {
-        this.registry = registry;
+        final TestcontainerRegistry instances = new TestcontainerRegistry();
+        containerRegistry.set(instances);
     }
 
     public void stopContainer(@Observes AfterClass afterClass) {
-        TestContainerInstances instances = containersWrapper.get();
+        TestcontainerRegistry instances = containerRegistry.get();
         if (instances != null) {
-            instances.beforeStop(registry);
-            for (GenericContainer<?> container : instances.all()) {
-                container.stop();
+            for (TestcontainerDescription container : instances) {
+                container.instance.stop();
+            }
+        }
+    }
+
+    public void startContainer(@Observes(precedence = 500) final AfterEnrichment event) {
+        // Look for the servers to start on fields only
+        for (TestcontainerDescription description : containerRegistry.get()) {
+            if (!(description.element instanceof Field)) {
+                continue;
+            }
+            if (description.testcontainer.value()) {
+                description.instance.start();
+            }
+        }
+        // Check the method
+        if (event.getMethod() != null) {
+            // Look for the servers to start on fields for this method
+            for (Parameter parameter : event.getMethod().getParameters()) {
+                for (TestcontainerDescription description : containerRegistry.get()) {
+                    if (parameter.equals(description.element) && description.testcontainer.value()) {
+                        description.instance.start();
+                    }
+                }
             }
         }
     }
@@ -103,6 +109,25 @@ class TestContainersObserver {
             return true;
         } catch (Throwable ex) {
             return false;
+        }
+    }
+
+    private static Throwable createException(final Class<? extends Throwable> value) {
+        // First try the String.class constructor
+        try {
+            final Constructor<? extends Throwable> constructor = value.getConstructor(String.class);
+            return constructor.newInstance("No Docker environment is available.");
+        } catch (NoSuchMethodException ignore) {
+            try {
+                final Constructor<? extends Throwable> constructor = value.getConstructor();
+                return constructor.newInstance();
+            } catch (NoSuchMethodException unused) {
+                throw new AssertionError(String.format("No String or no-arg constructor found for %s", value));
+            } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+                throw new AssertionError(String.format("Failed to create exception for type %s", value), e);
+            }
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            throw new AssertionError(String.format("Failed to create exception for type %s", value), e);
         }
     }
 }
