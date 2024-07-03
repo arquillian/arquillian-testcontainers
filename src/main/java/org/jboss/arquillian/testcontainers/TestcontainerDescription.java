@@ -5,24 +5,27 @@
 
 package org.jboss.arquillian.testcontainers;
 
-import java.lang.reflect.AnnotatedElement;
-
 import org.jboss.arquillian.testcontainers.api.Testcontainer;
 import org.testcontainers.containers.GenericContainer;
 
 /**
+ * A holder for information about the Testcontainer being injected into a field.
+ *
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
 class TestcontainerDescription {
 
+    /**
+     * The annotation that was on the field
+     */
     final Testcontainer testcontainer;
+    /**
+     * The instance of the container created
+     */
     final GenericContainer<?> instance;
-    final AnnotatedElement element;
 
-    TestcontainerDescription(final Testcontainer testcontainer, final AnnotatedElement element,
-            final GenericContainer<?> instance) {
+    TestcontainerDescription(final Testcontainer testcontainer, final GenericContainer<?> instance) {
         this.testcontainer = testcontainer;
-        this.element = element;
         this.instance = instance;
     }
 }

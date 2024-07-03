@@ -5,7 +5,6 @@
 package org.jboss.arquillian.testcontainers;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -16,6 +15,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.jboss.arquillian.testcontainers.api.Testcontainer;
 import org.testcontainers.containers.GenericContainer;
 
+/**
+ * A registry to store the testcontainer descriptions.
+ */
 class TestcontainerRegistry implements Iterable<TestcontainerDescription> {
     private final List<TestcontainerDescription> containers;
 
@@ -27,20 +29,20 @@ class TestcontainerRegistry implements Iterable<TestcontainerDescription> {
      * Lookup the container in the test container instances. If more than one container is found for the type or
      * qualifier, an {@link IllegalArgumentException} is thrown.
      *
-     * @param type       the type to lookup
-     * @param qualifiers any qualifying annotations
+     * @param type          the type to lookup
+     * @param testcontainer the test container annotation
+     * @param qualifiers    any qualifying annotations
      *
      * @return the generic type
      */
-    GenericContainer<?> lookupOrCreate(final Class<GenericContainer<?>> type, final AnnotatedElement element,
-            final Testcontainer testcontainer,
+    GenericContainer<?> lookupOrCreate(final Class<GenericContainer<?>> type, final Testcontainer testcontainer,
             final List<Annotation> qualifiers) {
         GenericContainer<?> result = lookup(type, qualifiers);
         if (result == null) {
             try {
                 final Constructor<? extends GenericContainer<?>> constructor = getConstructor(type, testcontainer);
                 result = constructor.newInstance();
-                this.containers.add(new TestcontainerDescription(testcontainer, element, result));
+                this.containers.add(new TestcontainerDescription(testcontainer, result));
             } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
                 throw new IllegalArgumentException(String.format("Could create container %s", type.getName()), e);
             }

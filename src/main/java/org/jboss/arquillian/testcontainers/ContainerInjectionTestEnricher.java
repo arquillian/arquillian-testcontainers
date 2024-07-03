@@ -7,6 +7,7 @@ package org.jboss.arquillian.testcontainers;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,13 +19,14 @@ import org.jboss.arquillian.core.api.annotation.Inject;
 import org.jboss.arquillian.test.spi.TestEnricher;
 import org.jboss.arquillian.testcontainers.api.DockerRequired;
 import org.jboss.arquillian.testcontainers.api.Testcontainer;
-import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.GenericContainer;
 
 /**
+ * A test enricher for injecting a {@link GenericContainer} into fields annotated with {@link Testcontainer @Testcontainer}.
+ *
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
-@SuppressWarnings({ "unchecked", "resource" })
+@SuppressWarnings({ "unchecked" })
 public class ContainerInjectionTestEnricher implements TestEnricher {
     @Inject
     private Instance<TestcontainerRegistry> instances;
@@ -34,9 +36,7 @@ public class ContainerInjectionTestEnricher implements TestEnricher {
         if (!isAnnotatedWith(testCase.getClass(), DockerRequired.class)) {
             return;
         }
-        final boolean isDockerAvailable = isDockerAvailable();
         for (Field field : getFieldsWithAnnotation(testCase.getClass())) {
-            checkForDocker(isDockerAvailable);
             Object value;
             try {
                 final List<Annotation> qualifiers = Stream.of(field.getAnnotations())
@@ -61,19 +61,14 @@ public class ContainerInjectionTestEnricher implements TestEnricher {
                 }
 
                 value = instances.get()
-                        .lookupOrCreate((Class<GenericContainer<?>>) field.getType(), field, testcontainer,
-                                qualifiers);
+                        .lookupOrCreate((Class<GenericContainer<?>>) field.getType(), testcontainer, qualifiers);
             } catch (Exception e) {
                 throw new RuntimeException("Could not lookup value for field " + field, e);
             }
             try {
-                if (field.trySetAccessible()) {
-                    field.set(testCase, value);
-                } else {
-                    throw new RuntimeException("Could not set value for field " + field);
-                }
-            } catch (RuntimeException e) {
-                throw e;
+                // Field marked as accessible during lookup to fail early if it cannot be made accessible. See the
+                // getFieldsWithAnnotation() method.
+                field.set(testCase, value);
             } catch (Exception e) {
                 throw new RuntimeException("Could not set value on field " + field + " using " + value, e);
             }
@@ -85,23 +80,6 @@ public class ContainerInjectionTestEnricher implements TestEnricher {
         return new Object[method.getParameterTypes().length];
     }
 
-    private static void checkForDocker(boolean isDockerAvailable) {
-        final String detailMessage = "No Docker environment is available.";
-        if (!isDockerAvailable) {
-            throw new AssertionError(detailMessage);
-        }
-    }
-
-    @SuppressWarnings({ "resource", "BooleanMethodIsAlwaysInverted" })
-    private static boolean isDockerAvailable() {
-        try {
-            DockerClientFactory.instance().client();
-            return true;
-        } catch (Throwable ex) {
-            return false;
-        }
-    }
-
     private static List<Field> getFieldsWithAnnotation(final Class<?> source) {
         final List<Field> foundFields = new ArrayList<>();
         Class<?> nextSource = source;
@@ -109,7 +87,7 @@ public class ContainerInjectionTestEnricher implements TestEnricher {
             for (Field field : nextSource.getDeclaredFields()) {
                 if (field.isAnnotationPresent(Testcontainer.class)) {
                     if (!field.trySetAccessible()) {
-                        throw new IllegalStateException(String.format("Could not make field %s accessible", field));
+                        throw new InaccessibleObjectException(String.format("Could not make field %s accessible", field));
                     }
                     foundFields.add(field);
                 }

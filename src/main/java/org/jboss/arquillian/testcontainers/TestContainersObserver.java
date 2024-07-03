@@ -29,6 +29,14 @@ class TestContainersObserver {
     @Inject
     private Instance<ContainerRegistry> registry;
 
+    /**
+     * This first checks if the {@link DockerRequired} annotation is present on the test class failing if necessary. It
+     * then creates the {@link TestcontainerRegistry} and stores it in a {@link ClassScoped} instance.
+     *
+     * @param beforeClass the before class event
+     *
+     * @throws Throwable if an error occurs
+     */
     public void createContainer(@Observes(precedence = 500) BeforeClass beforeClass) throws Throwable {
         final TestClass javaClass = beforeClass.getTestClass();
         final DockerRequired dockerRequired = javaClass.getAnnotation(DockerRequired.class);
@@ -41,48 +49,35 @@ class TestContainersObserver {
         containerRegistry.set(instances);
     }
 
+    /**
+     * Stops all containers, even ones not managed via Arquillian, after the test is complete
+     *
+     * @param afterClass the after class event
+     */
     public void stopContainer(@Observes AfterClass afterClass) {
-        TestcontainerRegistry instances = containerRegistry.get();
-        if (instances != null) {
-            for (TestcontainerDescription container : instances) {
+        TestcontainerRegistry registry = containerRegistry.get();
+        if (registry != null) {
+            for (TestcontainerDescription container : registry) {
                 container.instance.stop();
             }
         }
     }
 
+    /**
+     * Starts all containers after enrichment is done. This happens after the {@link ContainerInjectionTestEnricher} is
+     * invoked.
+     *
+     * @param event the after enrichment event
+     */
     public void startContainer(@Observes(precedence = 500) final AfterEnrichment event) {
-        // Look for the servers to start on fields only
-        for (TestcontainerDescription description : containerRegistry.get()) {
-            if (description.testcontainer.value()) {
-                description.instance.start();
+        TestcontainerRegistry registry = containerRegistry.get();
+        if (registry != null) {
+            // Look for the servers to start on fields only
+            for (TestcontainerDescription description : registry) {
+                if (description.testcontainer.value()) {
+                    description.instance.start();
+                }
             }
-        }
-    }
-
-    private void checkForDocker(boolean failIfNoDocker, boolean isDockerAvailable) {
-        final String detailMessage = "No Docker environment is available.";
-        if (!isDockerAvailable) {
-            if (failIfNoDocker) {
-                throw new AssertionError(detailMessage);
-            } else {
-                // First attempt to throw a JUnit 5 assumption
-                throwAssumption("org.opentest4j.TestAbortedException", detailMessage);
-                // Not found, attempt to throw a JUnit exception
-                throwAssumption("org.junit.AssumptionViolatedException", detailMessage);
-                // No supported test platform found. Throw an AssertionError.
-                throw new AssertionError(
-                        "Failed to find a support test platform and no Docker environment is available.");
-            }
-        }
-    }
-
-    private void throwAssumption(final String type, final String detailMessage) {
-        try {
-            Class<?> clazz = Class.forName(type);
-            Constructor<?> ctor = clazz.getConstructor(String.class);
-            throw (RuntimeException) ctor.newInstance(detailMessage);
-        } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException
-                | InvocationTargetException ignore) {
         }
     }
 
