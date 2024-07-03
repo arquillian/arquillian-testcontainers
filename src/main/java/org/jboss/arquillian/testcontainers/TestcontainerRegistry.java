@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jboss.arquillian.testcontainers.api.Testcontainer;
-import org.testcontainers.lifecycle.Startable;
+import org.testcontainers.containers.GenericContainer;
 
 class TestcontainerRegistry implements Iterable<TestcontainerDescription> {
     private final List<TestcontainerDescription> containers;
@@ -32,18 +32,13 @@ class TestcontainerRegistry implements Iterable<TestcontainerDescription> {
      *
      * @return the generic type
      */
-    Startable lookupOrCreate(final Class<Startable> type, final AnnotatedElement element, final Testcontainer testcontainer,
+    GenericContainer<?> lookupOrCreate(final Class<GenericContainer<?>> type, final AnnotatedElement element,
+            final Testcontainer testcontainer,
             final List<Annotation> qualifiers) {
-        Startable result = lookup(type, qualifiers);
+        GenericContainer<?> result = lookup(type, qualifiers);
         if (result == null) {
             try {
-                Class<? extends Startable> constructType = (testcontainer.type() == Startable.class) ? type
-                        : testcontainer.type();
-                if (constructType.isInterface()) {
-                    throw new IllegalArgumentException(
-                            String.format("Type %s is an interface and cannot be created.", constructType));
-                }
-                final Constructor<? extends Startable> constructor = constructType.getConstructor();
+                final Constructor<? extends GenericContainer<?>> constructor = getConstructor(type, testcontainer);
                 result = constructor.newInstance();
                 this.containers.add(new TestcontainerDescription(testcontainer, element, result));
             } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
@@ -62,7 +57,7 @@ class TestcontainerRegistry implements Iterable<TestcontainerDescription> {
      *
      * @return the generic type
      */
-    Startable lookup(final Class<?> type, final List<Annotation> qualifiers) {
+    GenericContainer<?> lookup(final Class<?> type, final List<Annotation> qualifiers) {
         final List<TestcontainerDescription> foundContainers = new ArrayList<>();
         if (qualifiers.isEmpty()) {
             for (TestcontainerDescription containerDesc : this.containers) {
@@ -96,5 +91,17 @@ class TestcontainerRegistry implements Iterable<TestcontainerDescription> {
     @Override
     public Iterator<TestcontainerDescription> iterator() {
         return containers.iterator();
+    }
+
+    private static Constructor<? extends GenericContainer<?>> getConstructor(final Class<GenericContainer<?>> type,
+            final Testcontainer testcontainer) throws NoSuchMethodException {
+        @SuppressWarnings("unchecked")
+        Class<? extends GenericContainer<?>> constructType = (testcontainer.type() == GenericContainer.class) ? type
+                : (Class<? extends GenericContainer<?>>) testcontainer.type();
+        if (constructType.isInterface()) {
+            throw new IllegalArgumentException(
+                    String.format("Type %s is an interface and cannot be created.", constructType));
+        }
+        return constructType.getConstructor();
     }
 }

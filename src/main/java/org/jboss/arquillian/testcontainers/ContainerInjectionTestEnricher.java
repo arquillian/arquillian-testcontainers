@@ -22,7 +22,7 @@ import org.jboss.arquillian.test.spi.TestEnricher;
 import org.jboss.arquillian.testcontainers.api.DockerRequired;
 import org.jboss.arquillian.testcontainers.api.Testcontainer;
 import org.testcontainers.DockerClientFactory;
-import org.testcontainers.lifecycle.Startable;
+import org.testcontainers.containers.GenericContainer;
 
 /**
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
@@ -47,9 +47,9 @@ public class ContainerInjectionTestEnricher implements TestEnricher {
                         .collect(Collectors.toList());
                 final Testcontainer testcontainer = field.getAnnotation(Testcontainer.class);
 
-                // If the field is the default Startable, validate the field is a Startable
-                if (testcontainer.type() == Startable.class) {
-                    if (!(Startable.class.isAssignableFrom(field.getType()))) {
+                // If the field is the default GenericContainer, validate the field is a GenericContainer
+                if (testcontainer.type() == GenericContainer.class) {
+                    if (!(GenericContainer.class.isAssignableFrom(field.getType()))) {
                         throw new IllegalArgumentException(
                                 String.format("Field %s is not assignable to %s", field, testcontainer.type().getName()));
                     }
@@ -62,7 +62,8 @@ public class ContainerInjectionTestEnricher implements TestEnricher {
                     }
                 }
 
-                value = instances.get().lookupOrCreate((Class<Startable>) field.getType(), field, testcontainer, qualifiers);
+                value = instances.get().lookupOrCreate((Class<GenericContainer<?>>) field.getType(), field, testcontainer,
+                        qualifiers);
             } catch (Exception e) {
                 throw new RuntimeException("Could not lookup value for field " + field, e);
             }
@@ -95,9 +96,9 @@ public class ContainerInjectionTestEnricher implements TestEnricher {
                         .filter(a -> !(a instanceof Testcontainer))
                         .collect(Collectors.toList());
 
-                // If the field is the default Startable, validate the field is a Startable
-                if (testcontainer.type() == Startable.class) {
-                    if (!(Startable.class.isAssignableFrom(parameter.getType()))) {
+                // If the field is the default GenericContainer, validate the field is a GenericContainer
+                if (testcontainer.type() == GenericContainer.class) {
+                    if (!(GenericContainer.class.isAssignableFrom(parameter.getType()))) {
                         throw new IllegalArgumentException(
                                 String.format("Parameter %s is not assignable to %s", parameter,
                                         testcontainer.type().getName()));
@@ -110,7 +111,8 @@ public class ContainerInjectionTestEnricher implements TestEnricher {
                                         .getName()));
                     }
                 }
-                values[i] = instances.get().lookupOrCreate((Class<Startable>) parameter.getType(), parameter, testcontainer,
+                values[i] = instances.get().lookupOrCreate((Class<GenericContainer<?>>) parameter.getType(), parameter,
+                        testcontainer,
                         qualifiers);
             }
         }

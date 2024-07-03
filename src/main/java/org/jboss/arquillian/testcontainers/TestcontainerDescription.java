@@ -8,7 +8,7 @@ package org.jboss.arquillian.testcontainers;
 import java.lang.reflect.AnnotatedElement;
 
 import org.jboss.arquillian.testcontainers.api.Testcontainer;
-import org.testcontainers.lifecycle.Startable;
+import org.testcontainers.containers.GenericContainer;
 
 /**
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
@@ -16,10 +16,11 @@ import org.testcontainers.lifecycle.Startable;
 class TestcontainerDescription {
 
     final Testcontainer testcontainer;
-    final Startable instance;
+    final GenericContainer<?> instance;
     final AnnotatedElement element;
 
-    TestcontainerDescription(final Testcontainer testcontainer, final AnnotatedElement element, final Startable instance) {
+    TestcontainerDescription(final Testcontainer testcontainer, final AnnotatedElement element,
+            final GenericContainer<?> instance) {
         this.testcontainer = testcontainer;
         this.element = element;
         this.instance = instance;

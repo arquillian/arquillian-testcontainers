@@ -13,11 +13,11 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Parameter;
 
-import org.testcontainers.lifecycle.Startable;
+import org.testcontainers.containers.GenericContainer;
 
 /**
  * Used to annotate a field or parameter which <strong>must</strong> be an instance of a
- * {@link Startable}. A {@link DockerRequired} annotation must be present on the
+ * {@link GenericContainer}. A {@link DockerRequired} annotation must be present on the
  * type to use Testcontainer injection.
  */
 @Inherited
@@ -37,11 +37,11 @@ public @interface Testcontainer {
     /**
      * The type used to create the value for the field or parameter. The type must have a no-arg constructor.
      * <p>
-     * If left as the default value, {@link Startable}, the type to construct is derived from the
+     * If left as the default value, {@link GenericContainer}, the type to construct is derived from the
      * {@linkplain Field#getType() field} or {@linkplain Parameter#getType() parameter}.
      * </p>
      *
      * @return the type to construct
      */
-    Class<? extends Startable> type() default Startable.class;
+    Class<? extends GenericContainer> type() default GenericContainer.class;
 }
