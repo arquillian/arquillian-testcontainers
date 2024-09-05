@@ -80,7 +80,7 @@
 
         <!-- Plugin versions -->
         <version.formatter.maven.plugin>2.24.1</version.formatter.maven.plugin>
-        <version.impsort.maven.plugin>1.11.0</version.impsort.maven.plugin>
+        <version.impsort.maven.plugin>1.12.0</version.impsort.maven.plugin>
 
         <!-- Configuration properties -->
         <skipFormatting>false</skipFormatting>
