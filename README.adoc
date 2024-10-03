@@ -1,0 +1,146 @@
+= Arquillian Testcontainers
+
+Arquillian Testcontainers is a loadable extension for  https://testcontainers.com/[testcontainers] support. This project
+is not meant to provide an Arquillian adaptor via a Testcontainer, but rather compliment an Arquillian adaptor by
+allowing Arquillian to manage a Testcontainer.
+
+== Usage
+
+To start using Arquillian Testcontainors add the following Maven dependency:
+
+[source,xml]
+----
+<dependency>
+    <groupId>org.jboss.arquillian</groupId>
+    <artifactId>arquillian-testcontainers</artifactId>
+    <version>${version.org.jboss.arquillian.testcontainers</version>
+    <scope>test</scope>
+</dependency>
+----
+
+=== Using a Testcontainer
+
+To use a Testcontainer within an Arquillian test you must annotate the type with `@DockerRequired`. What this annotation
+does is verify a Docker implementation is available. If a Docker implementation is not available, an exception is thrown.
+By default, this is a `java.lang.AssertionError`. This can be overridden in the `@DockerRequired(value=)` attribute. For
+example in JUnit 5 to skip the test rather than throw an error you would use the `@DockerRequired(TestAbortedException.class)`.
+This would throw a `org.opentest4j.TestAbortedException` if a Docker implementation is not available and the test will
+be skipped.
+
+To inject a Testcontainer into your Arquillian test, use the `@Testcontainer` annotation.
+
+[source,java]
+----
+@ExtendWith(ArquillianExtension.class)
+@DockerRequired(TestAbortedException.class)
+@RunAsClient
+public class SimpleContainerTest {
+
+    @Testcontainer
+    private static SimpleTestContainer container;
+
+    @Deployment
+    public static JavaArchive createDeployment() {
+        return ShrinkWrap.create(JavaArchive.class)
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
+    }
+
+    @Test
+    public void testContainerInjected() {
+        Assertions.assertNotNull(container, "Expected the container to be injected.");
+        Assertions.assertTrue(container.isRunning(), "Expected the container to not be running");
+    }
+}
+----
+
+The injected type must be an implementation of `org.testcontainers.containers.GenericContainer`. If you would like to
+inject a `GenericContainer<?>`, you can use the `type` parameter in the `@Testcontainer` annotation to qualify the type:
+
+[source,java]
+----
+@ExtendWith(ArquillianExtension.class)
+@RunAsClient
+@DockerRequired(TestAbortedException.class)
+public class TypeSpecifiedInjectionTest {
+
+    @Deployment
+    public static JavaArchive createDeployment() {
+        return ShrinkWrap.create(JavaArchive.class)
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
+    }
+
+    @Testcontainer(type = WildFlyContainer.class)
+    private GenericContainer<?> wildfly;
+
+    @Testcontainer(type = SimpleTestContainer.class)
+    private GenericContainer<?> container;
+
+    @Test
+    public void checkWildFly() {
+        Assertions.assertNotNull(wildfly);
+        Assertions.assertTrue(wildfly.isRunning());
+    }
+
+    @Test
+    public void checkSimpleTestContainer() {
+        Assertions.assertNotNull(container, "Expected the container to be injected.");
+        Assertions.assertTrue(container.isRunning(), "Expected the container to be running");
+    }
+}
+----
+
+By default, this extension will manage the lifecyle of each Testcontainer that is injected into the test. If you'd
+prefer to manage the lifecyle yourself, use the `value=true` attribute in the `@Testcontainer` annotation. For example
+use `@Testcontainer(false)`.
+
+== Helpers
+
+Arquillian Testcontainers contains a helper for consuming log messages. The `LoggingConsumer` simply consumes the
+containers output and logs it via a `java.util.logging.Logger`.
+
+== WildFly Example
+
+The following is an example of using a Testcontainer in WildFly with a `ServerSetupTask`.
+
+[source,java]
+----
+@DockerRequired
+@ExtendWith(ArquillianExtension.class)
+@RunAsClient
+@ServerSetup(WildFlyTest.ContainerSetupTask.class)
+public class WildFlyTest {
+    @DockerRequired
+    @ReloadIfRequired
+    public static class ContainerSetupTask implements ServerSetupTask {
+
+        @Testcontainer
+        private KeycloakContainer keycloak;
+
+        @Override
+        public final void setup(final ManagementClient managementClient, final String containerId) throws Exception {
+            final var containerAddress = keycloak.getContainerAddress();
+            // Do the Keycloak setup
+        }
+
+        @Override
+        public final void tearDown(final ManagementClient managementClient, final String containerId) throws Exception {
+        }
+    }
+
+    @Testcontainer
+    private KeycloakContainer keycloak;
+
+    @Deployment
+    public static WebArchive createDeployment() {
+        return ShrinkWrap.create(WebArchive.class)
+                .addClasses(SecureEndpoint.class, SecureApplication.class)
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
+    }
+
+    @Test
+    public void auth() throws Exception {
+        final var response = makeRequest(keycloak.getContainerAddress(keycloak.getMappedPort(8080)));
+        // Validate response
+    }
+}
+----
