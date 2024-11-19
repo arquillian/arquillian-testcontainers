@@ -42,7 +42,15 @@ class TestContainersObserver {
         final DockerRequired dockerRequired = javaClass.getAnnotation(DockerRequired.class);
         if (dockerRequired != null) {
             if (!isDockerAvailable()) {
-                throw createException(dockerRequired.value());
+                var throwable = dockerRequired.value();
+                final var overrideClass = System.getProperty("org.arquillian.testcontainers.docker.required.exception");
+                if (overrideClass != null && !overrideClass.isBlank()) {
+                    Class<?> override = Class.forName(overrideClass);
+                    if (override.isAssignableFrom(Throwable.class)) {
+                        throwable = (Class<? extends Throwable>) override;
+                    }
+                }
+                throw createException(throwable);
             }
         }
         final TestcontainerRegistry instances = new TestcontainerRegistry();
