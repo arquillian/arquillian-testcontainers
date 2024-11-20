@@ -1,12 +1,12 @@
 = Arquillian Testcontainers
 
-Arquillian Testcontainers is a loadable extension for  https://testcontainers.com/[testcontainers] support. This project
+Arquillian Testcontainers is a loadable extension for  https://testcontainers.com/[Testcontainers] support. This project
 is not meant to provide an Arquillian adaptor via a Testcontainer, but rather compliment an Arquillian adaptor by
 allowing Arquillian to manage a Testcontainer.
 
 == Usage
 
-To start using Arquillian Testcontainors add the following Maven dependency:
+To start using Arquillian Testcontainers add the following Maven dependency:
 
 [source,xml]
 ----
@@ -89,8 +89,8 @@ public class TypeSpecifiedInjectionTest {
 }
 ----
 
-By default, this extension will manage the lifecyle of each Testcontainer that is injected into the test. If you'd
-prefer to manage the lifecyle yourself, use the `value=true` attribute in the `@Testcontainer` annotation. For example
+By default, this extension will manage the lifecycle of each Testcontainer that is injected into the test. If you'd
+prefer to manage the lifecycle yourself, use the `value=true` attribute in the `@Testcontainer` annotation. For example
 use `@Testcontainer(false)`.
 
 == Helpers
