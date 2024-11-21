@@ -46,7 +46,7 @@ class TestContainersObserver {
                 final var overrideClass = System.getProperty("org.arquillian.testcontainers.docker.required.exception");
                 if (overrideClass != null && !overrideClass.isBlank()) {
                     Class<?> override = Class.forName(overrideClass);
-                    if (override.isAssignableFrom(Throwable.class)) {
+                    if (Throwable.class.isAssignableFrom(override)) {
                         throwable = (Class<? extends Throwable>) override;
                     }
                 }
