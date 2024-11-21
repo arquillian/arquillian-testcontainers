@@ -4,15 +4,14 @@
   ~ SPDX-License-Identifier: Apache-2.0
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <!-- Parent -->
     <parent>
         <groupId>org.jboss</groupId>
         <artifactId>jboss-parent</artifactId>
         <version>47</version>
-        <relativePath/>
+        <relativePath />
     </parent>
 
     <!-- Model Version -->
@@ -21,7 +20,7 @@
     <!-- Artifact Configuration -->
     <groupId>org.jboss.arquillian</groupId>
     <artifactId>arquillian-testcontainers</artifactId>
-    <version>1.0.0.Alpha3-SNAPSHOT</version>
+    <version>1.0.0.Alpha3</version>
     <packaging>jar</packaging>
 
     <name>Arquillian Testcontainers Support</name>
@@ -60,7 +59,7 @@
         <connection>scm:git:git://git@github.com:arquillian/arquillian-testcontainers.git</connection>
         <developerConnection>scm:git:ssh://github.com/arquillian/arquillian-testcontainers.git</developerConnection>
         <url>git://github.com/arquillian/arquillian-testcontainers.git</url>
-        <tag>HEAD</tag>
+        <tag>1.0.0.Alpha3</tag>
     </scm>
 
     <issueManagement>
