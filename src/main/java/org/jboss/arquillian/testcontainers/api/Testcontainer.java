@@ -16,12 +16,12 @@ import org.testcontainers.containers.GenericContainer;
 
 /**
  * Used to annotate a field which <strong>must</strong> be an instance of a {@link GenericContainer}. A
- * {@link DockerRequired} annotation must be present on the type to use Testcontainer injection.
+ * {@link ContainerRequired} annotation must be present on the type to use Testcontainer injection.
  *
  * <pre>
  * &#064;ExtendWith(ArquillianExtension.class)
  * &#064;RunAsClient
- * // By throwing the TestAbortedException, the test will be skipped if docker is not available
+ * // By throwing the TestAbortedException, the test will be skipped if a container engine is not available
  * &#064;DockerRequired(TestAbortedException.class)
  * public class ContainerTest {
  *
