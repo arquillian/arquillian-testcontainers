@@ -8,8 +8,8 @@ package org.jboss.arquillian.testcontainers.test;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit5.ArquillianExtension;
-import org.jboss.arquillian.testcontainers.api.DockerRequired;
 import org.jboss.arquillian.testcontainers.api.Testcontainer;
+import org.jboss.arquillian.testcontainers.api.TestcontainersRequired;
 import org.jboss.arquillian.testcontainers.test.common.SimpleTestContainer;
 import org.jboss.arquillian.testcontainers.test.common.WildFlyContainer;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -26,7 +26,7 @@ import org.testcontainers.containers.GenericContainer;
  */
 @ExtendWith(ArquillianExtension.class)
 @RunAsClient
-@DockerRequired(TestAbortedException.class)
+@TestcontainersRequired(TestAbortedException.class)
 public class TypeSpecifiedInjectionTest {
 
     @Deployment

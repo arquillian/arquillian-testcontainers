@@ -17,8 +17,8 @@ import java.util.stream.Stream;
 import org.jboss.arquillian.core.api.Instance;
 import org.jboss.arquillian.core.api.annotation.Inject;
 import org.jboss.arquillian.test.spi.TestEnricher;
-import org.jboss.arquillian.testcontainers.api.DockerRequired;
 import org.jboss.arquillian.testcontainers.api.Testcontainer;
+import org.jboss.arquillian.testcontainers.api.TestcontainersRequired;
 import org.testcontainers.containers.GenericContainer;
 
 /**
@@ -33,7 +33,7 @@ public class ContainerInjectionTestEnricher implements TestEnricher {
 
     @Override
     public void enrich(final Object testCase) {
-        if (!isAnnotatedWith(testCase.getClass(), DockerRequired.class)) {
+        if (!isAnnotatedWith(testCase.getClass(), TestcontainersRequired.class)) {
             return;
         }
         for (Field field : getFieldsWithAnnotation(testCase.getClass())) {

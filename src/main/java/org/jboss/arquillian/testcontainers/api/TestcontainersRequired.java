@@ -12,7 +12,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * An annotation which will check if docker is available and if not throw an exception. By default, this will throw an
+ * An annotation which will check if container engine is available and if not throw an exception. By default, this will throw an
  * {@link AssertionError}. However, you can define the type of exception to throw. The exception <strong>must</strong>
  * have a string or no-arg constructor.
  *
@@ -24,16 +24,16 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
-public @interface DockerRequired {
+public @interface TestcontainersRequired {
 
     /**
      * The type of the exception to throw. The exception must have a public string constructor.
      * <p>
-     * By default this throws an {@link AssertionError} error. However, this could throw, for example, a
+     * By default, this throws an {@link AssertionError}. However, this could throw, for example, a
      * {@code TestAbortedException} to act as an Assumption error.
      * </p>
      *
-     * @return the exception type to throw if docker is not available
+     * @return the exception type to throw if container engine is not available
      */
     Class<? extends Throwable> value() default AssertionError.class;
 }
