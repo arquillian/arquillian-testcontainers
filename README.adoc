@@ -20,10 +20,10 @@ To start using Arquillian Testcontainers add the following Maven dependency:
 
 === Using a Testcontainer
 
-To use a Testcontainer within an Arquillian test you must annotate the type with `@DockerRequired`. What this annotation
+To use a Testcontainer within an Arquillian test you must annotate the type with `@TestcontainersRequired`. What this annotation
 does is verify a Docker implementation is available. If a Docker implementation is not available, an exception is thrown.
-By default, this is a `java.lang.AssertionError`. This can be overridden in the `@DockerRequired(value=)` attribute. For
-example in JUnit 5 to skip the test rather than throw an error you would use the `@DockerRequired(TestAbortedException.class)`.
+By default, this is a `java.lang.AssertionError`. This can be overridden in the `@TestcontainersRequired(value=)` attribute. For
+example in JUnit 5 to skip the test rather than throw an error you would use the `@TestcontainersRequired(TestAbortedException.class)`.
 This would throw a `org.opentest4j.TestAbortedException` if a Docker implementation is not available and the test will
 be skipped.
 
@@ -32,7 +32,7 @@ To inject a Testcontainer into your Arquillian test, use the `@Testcontainer` an
 [source,java]
 ----
 @ExtendWith(ArquillianExtension.class)
-@DockerRequired(TestAbortedException.class)
+@TestcontainersRequired(TestAbortedException.class)
 @RunAsClient
 public class SimpleContainerTest {
 
@@ -60,7 +60,7 @@ inject a `GenericContainer<?>`, you can use the `type` parameter in the `@Testco
 ----
 @ExtendWith(ArquillianExtension.class)
 @RunAsClient
-@DockerRequired(TestAbortedException.class)
+@TestcontainersRequired(TestAbortedException.class)
 public class TypeSpecifiedInjectionTest {
 
     @Deployment
@@ -104,12 +104,12 @@ The following is an example of using a Testcontainer in WildFly with a `ServerSe
 
 [source,java]
 ----
-@DockerRequired
+@TestcontainersRequired
 @ExtendWith(ArquillianExtension.class)
 @RunAsClient
 @ServerSetup(WildFlyTest.ContainerSetupTask.class)
 public class WildFlyTest {
-    @DockerRequired
+    @TestcontainersRequired
     @ReloadIfRequired
     public static class ContainerSetupTask implements ServerSetupTask {
 
