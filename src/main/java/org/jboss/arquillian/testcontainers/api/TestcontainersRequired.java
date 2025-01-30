@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
  * have a string or no-arg constructor.
  *
  * <pre>
- *     {@code @DockerRequired(TestAbortedException.class)}
+ *     {@code @TestcontainersRequired(TestAbortedException.class)}
  * </pre>
  */
 @Inherited
