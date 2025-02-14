@@ -78,7 +78,7 @@
         <version.org.junit>5.11.4</version.org.junit>
 
         <!-- Plugin versions -->
-        <version.formatter.maven.plugin>2.24.1</version.formatter.maven.plugin>
+        <version.formatter.maven.plugin>2.25.0</version.formatter.maven.plugin>
         <version.impsort.maven.plugin>1.12.0</version.impsort.maven.plugin>
 
         <!-- Configuration properties -->
