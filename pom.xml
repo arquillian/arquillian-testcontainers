@@ -74,7 +74,7 @@
 
         <!-- Dependency versions -->
         <version.org.jboss.arquillian.core>1.9.4.Final</version.org.jboss.arquillian.core>
-        <version.testcontainers>1.20.6</version.testcontainers>
+        <version.testcontainers>1.21.0</version.testcontainers>
         <version.org.junit>5.12.2</version.org.junit>
 
         <!-- Plugin versions -->
