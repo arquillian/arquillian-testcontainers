@@ -73,7 +73,7 @@
         <jdk.min.version>17</jdk.min.version>
 
         <!-- Dependency versions -->
-        <version.org.jboss.arquillian.core>1.9.5.Final</version.org.jboss.arquillian.core>
+        <version.org.jboss.arquillian.core>1.10.0.Final</version.org.jboss.arquillian.core>
         <version.testcontainers>1.21.2</version.testcontainers>
         <version.org.junit>5.13.2</version.org.junit>
 
