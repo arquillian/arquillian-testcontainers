@@ -11,9 +11,9 @@ To start using Arquillian Testcontainers add the following Maven dependency:
 [source,xml]
 ----
 <dependency>
-    <groupId>org.jboss.arquillian</groupId>
+    <groupId>org.arquillian.testcontainers</groupId>
     <artifactId>arquillian-testcontainers</artifactId>
-    <version>${version.org.jboss.arquillian.testcontainers</version>
+    <version>${version.org.arquillian.testcontainers}</version>
     <scope>test</scope>
 </dependency>
 ----
