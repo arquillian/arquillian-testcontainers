@@ -18,7 +18,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <!-- Artifact Configuration -->
-    <groupId>org.jboss.arquillian</groupId>
+    <groupId>org.arquillian.testcontainers</groupId>
     <artifactId>arquillian-testcontainers</artifactId>
     <version>1.0.0.Alpha5-SNAPSHOT</version>
     <packaging>jar</packaging>
