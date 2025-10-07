@@ -5,8 +5,8 @@
 
 package org.arquillian.testcontainers.common;
 
-import org.arquillian.testcontainers.api.LoggingConsumer;
 import org.arquillian.testcontainers.TypeSpecifiedInjectionTest;
+import org.arquillian.testcontainers.api.LoggingConsumer;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;

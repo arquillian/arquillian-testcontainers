@@ -7,6 +7,7 @@ package org.arquillian.testcontainers;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+import org.arquillian.testcontainers.api.TestcontainersRequired;
 import org.jboss.arquillian.container.spi.ContainerRegistry;
 import org.jboss.arquillian.core.api.Instance;
 import org.jboss.arquillian.core.api.InstanceProducer;
@@ -17,7 +18,6 @@ import org.jboss.arquillian.test.spi.annotation.ClassScoped;
 import org.jboss.arquillian.test.spi.event.enrichment.AfterEnrichment;
 import org.jboss.arquillian.test.spi.event.suite.AfterClass;
 import org.jboss.arquillian.test.spi.event.suite.BeforeClass;
-import org.arquillian.testcontainers.api.TestcontainersRequired;
 import org.testcontainers.DockerClientFactory;
 
 @SuppressWarnings("unused")
