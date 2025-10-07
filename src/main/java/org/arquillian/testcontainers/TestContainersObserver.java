@@ -2,7 +2,7 @@
  * Copyright The Arquillian Authors
  * SPDX-License-Identifier: Apache-2.0
  */
-package org.jboss.arquillian.testcontainers;
+package org.arquillian.testcontainers;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -17,7 +17,7 @@ import org.jboss.arquillian.test.spi.annotation.ClassScoped;
 import org.jboss.arquillian.test.spi.event.enrichment.AfterEnrichment;
 import org.jboss.arquillian.test.spi.event.suite.AfterClass;
 import org.jboss.arquillian.test.spi.event.suite.BeforeClass;
-import org.jboss.arquillian.testcontainers.api.TestcontainersRequired;
+import org.arquillian.testcontainers.api.TestcontainersRequired;
 import org.testcontainers.DockerClientFactory;
 
 @SuppressWarnings("unused")

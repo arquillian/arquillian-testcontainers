@@ -2,7 +2,7 @@
  * Copyright The Arquillian Authors
  * SPDX-License-Identifier: Apache-2.0
  */
-package org.jboss.arquillian.testcontainers;
+package org.arquillian.testcontainers;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -12,7 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.jboss.arquillian.testcontainers.api.Testcontainer;
+import org.arquillian.testcontainers.api.Testcontainer;
 import org.testcontainers.containers.GenericContainer;
 
 /**
