@@ -8,12 +8,14 @@ on:
     branches-ignore:
       - 'dependabot/**'
     paths:
+      - '.github/workflows/maven.yml'
       - '**/pom.xml'
       - 'src/**'
   pull_request:
     branches:
       - '**'
     paths:
+      - '.github/workflows/maven.yml'
       - '**/pom.xml'
       - 'src/**'
 
@@ -45,45 +47,23 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest ]
-        java: ['17', '21']
 
     steps:
       - uses: actions/checkout@v5
-      - name: Set up JDK ${{ matrix.java }}
-        uses: actions/setup-java@v5
-        with:
-          java-version: ${{ matrix.java }}
-          distribution: 'temurin'
-          cache: 'maven'
-      - name: Build with Maven Java ${{ matrix.java }}
-        run: mvn -B -ntp clean verify
-      - uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: surefire-reports-${{ matrix.os }}-${{ matrix.java }}
-          path: '**/surefire-reports/*'
-  test-java11:
-    needs: format-check
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest ]
-
-    steps:
-      - uses: actions/checkout@v5
-      - name: Set up JDK ${{ matrix.java }}
+      - name: Set up JDK's
         uses: actions/setup-java@v5
         with:
           java-version: |
             11
             17
+            21
+            25
           distribution: 'temurin'
           cache: 'maven'
-      - name: Build with Maven Java ${{ matrix.java }}
-        run: mvn -B -ntp clean verify '-Djava11.home="${{env.JAVA_HOME_11_X64}}"'
+      - name: Build and Test on ${{ matrix.os }}
+        run: mvn -B -V -ntp clean verify '-Djava11.home=${{env.JAVA_HOME_11_X64}}' '-Djava17.home=${{env.JAVA_HOME_17_X64}}' '-Djava21.home=${{env.JAVA_HOME_21_X64}}'
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: surefire-reports-${{ matrix.os }}-${{ matrix.java }}
+          name: surefire-reports-${{ matrix.os }}
           path: '**/surefire-reports/*'
