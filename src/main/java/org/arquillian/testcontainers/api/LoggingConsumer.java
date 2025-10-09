@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package org.jboss.arquillian.testcontainers.api;
+package org.arquillian.testcontainers.api;
 
 import java.util.function.Consumer;
 import java.util.logging.Logger;

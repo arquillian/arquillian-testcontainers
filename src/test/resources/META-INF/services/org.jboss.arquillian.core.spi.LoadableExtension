@@ -1,1 +1,6 @@
-org.jboss.arquillian.testcontainers.test.common.TestLoadableExtension
+#
+# Copyright The Arquillian Authors
+# SPDX-License-Identifier: Apache-2.0
+#
+
+org.arquillian.testcontainers.common.TestLoadableExtension

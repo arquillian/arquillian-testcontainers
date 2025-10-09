@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package org.jboss.arquillian.testcontainers;
+package org.arquillian.testcontainers;
 
-import org.jboss.arquillian.testcontainers.api.Testcontainer;
+import org.arquillian.testcontainers.api.Testcontainer;
 import org.testcontainers.containers.GenericContainer;
 
 /**
