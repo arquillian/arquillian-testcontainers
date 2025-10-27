@@ -62,7 +62,7 @@ jobs:
           cache: 'maven'
       - name: Build and Test on ${{ matrix.os }}
         run: mvn -B -V -ntp clean verify '-Djava11.home=${{env.JAVA_HOME_11_X64}}' '-Djava17.home=${{env.JAVA_HOME_17_X64}}' '-Djava21.home=${{env.JAVA_HOME_21_X64}}'
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: failure()
         with:
           name: surefire-reports-${{ matrix.os }}
