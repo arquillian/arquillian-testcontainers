@@ -23,7 +23,7 @@ import org.testcontainers.DockerClientFactory;
 @SuppressWarnings("unused")
 class TestContainersObserver {
 
-    private static final String NO_DOCKER_MSG = "No Docker environment is available.";
+    private static final String NO_DOCKER_MSG = "No Docker/podman environment is available.";
 
     @Inject
     @ClassScoped
