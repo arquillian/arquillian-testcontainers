@@ -117,7 +117,7 @@ class TestContainersObserver {
                 return constructor.newInstance();
             } catch (NoSuchMethodException unused) {
                 throw new AssertionError(String.format(
-                        NO_DOCKER_MSG + " + (No String or no-arg constructor found for desired failure type %s)", value));
+                        NO_DOCKER_MSG + " (No String or no-arg constructor found for desired failure type %s)", value));
             } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
                 throw new AssertionError(
                         String.format(NO_DOCKER_MSG + " (Failed to create exception for desired failure type %s)", value), e);
