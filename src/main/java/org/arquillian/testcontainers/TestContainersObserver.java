@@ -22,6 +22,9 @@ import org.testcontainers.DockerClientFactory;
 
 @SuppressWarnings("unused")
 class TestContainersObserver {
+
+    private static final String NO_DOCKER_MSG = "No Docker/podman environment is available.";
+
     @Inject
     @ClassScoped
     private InstanceProducer<TestcontainerRegistry> containerRegistry;
@@ -100,21 +103,28 @@ class TestContainersObserver {
     }
 
     private static Throwable createException(final Class<? extends Throwable> value) {
-        // First try the String.class constructor
+        // First the common path, using the AssertionError(Object) c'tor
+        if (value == AssertionError.class) {
+            return new AssertionError(NO_DOCKER_MSG);
+        }
+        // Next try the String.class constructor if there is one
         try {
             final Constructor<? extends Throwable> constructor = value.getConstructor(String.class);
-            return constructor.newInstance("No Docker environment is available.");
+            return constructor.newInstance(NO_DOCKER_MSG);
         } catch (NoSuchMethodException ignore) {
             try {
                 final Constructor<? extends Throwable> constructor = value.getConstructor();
                 return constructor.newInstance();
             } catch (NoSuchMethodException unused) {
-                throw new AssertionError(String.format("No String or no-arg constructor found for %s", value));
+                throw new AssertionError(String.format(
+                        NO_DOCKER_MSG + " (No String or no-arg constructor found for desired failure type %s)", value));
             } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-                throw new AssertionError(String.format("Failed to create exception for type %s", value), e);
+                throw new AssertionError(
+                        String.format(NO_DOCKER_MSG + " (Failed to create exception for desired failure type %s)", value), e);
             }
         } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw new AssertionError(String.format("Failed to create exception for type %s", value), e);
+            throw new AssertionError(
+                    String.format(NO_DOCKER_MSG + " (Failed to create exception for desired failure type %s)", value), e);
         }
     }
 }
