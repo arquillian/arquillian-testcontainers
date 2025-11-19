@@ -79,7 +79,7 @@
         <!-- Dependency versions -->
         <version.org.jboss.arquillian.core>1.10.0.Final</version.org.jboss.arquillian.core>
         <version.testcontainers>2.0.2</version.testcontainers>
-        <version.org.junit>5.13.4</version.org.junit>
+        <version.org.junit>6.0.1</version.org.junit>
 
         <!-- Plugin versions -->
         <version.central.publishing.maven.plugin>0.9.0</version.central.publishing.maven.plugin>
